@@ -13,7 +13,6 @@ import { registryUser, setUsers } from "../store/userSlice";
 const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [errorMessage, setErrorMessage] = useState(null);
   const [userName, setUserName] = useState("");
 
   const handleChange = (event) => {
@@ -28,7 +27,7 @@ const LoginPage = () => {
       dispatch(setUsers({ users }));
       navigate(FORM_ROUTE);
     } catch (e) {
-      setErrorMessage(e.response.data.message);
+      console.log(e);
     }
   };
 

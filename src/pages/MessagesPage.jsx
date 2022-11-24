@@ -10,10 +10,9 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Box from "@mui/material/Box";
 
 import { FORM_ROUTE } from "../utils/const";
-import { getOutbox } from "../http/messageAPI";
+import { getInbox } from "../http/messageAPI";
 
 const MessagePage = () => {
   const navigate = useNavigate();
@@ -22,7 +21,7 @@ const MessagePage = () => {
   const [inbox, setInbox] = useState([]);
 
   const getInboxMessages = async () => {
-    const inbox = await getOutbox(currentUser);
+    const inbox = await getInbox(currentUser);
     setInbox(inbox);
   };
 
@@ -58,34 +57,34 @@ const MessagePage = () => {
           {inbox.length
             ? inbox.map((item) => {
                 return (
-                  <Accordion key={item.createdAt}>
+                  <Accordion
+                    key={item.createdAt}
+                    sx={{
+                      borderRadius: 5,
+                      backgroundColor: "#4069ee",
+                      marginTop: 10,
+                      minWidth: 400,
+                    }}
+                  >
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}
                       aria-controls="panel1a-content"
                       id="panel1a-header"
                     >
-                      <Typography variant="body1">{item.from}</Typography>
-                      <Typography variant="body1">{item.title}</Typography>
-                      <Typography variant="body1">
-                        {moment(`${item.createdAt || ""}`).format(
-                          "MMMM Do YYYY, h:mm:ss a"
-                        )}
-                      </Typography>
+                      <Stack>
+                        <Typography variant="body1">{item.from}</Typography>
+                        <Typography variant="body1">{item.title}</Typography>
+                        <Typography variant="body1">
+                          {moment(`${item.createdAt || ""}`).format(
+                            "MMMM Do YYYY, h:mm:ss a"
+                          )}
+                        </Typography>
+                      </Stack>
                     </AccordionSummary>
                     <AccordionDetails>
                       <Typography>{item.body}</Typography>
                     </AccordionDetails>
                   </Accordion>
-                  // <Stack key={item.createdAt} sx={{ cursor: "pointer" }}>
-                  //   <Typography>{item.from}: </Typography>
-                  //   <Typography>Title: {item.title}</Typography>
-                  //   {/* <Typography>Message: {item.body}</Typography> */}
-                  //   <Typography>
-                  //     {moment(`${item.createdAt || ""}`).format(
-                  //       "MMMM Do YYYY, h:mm:ss a"
-                  //     )}
-                  //   </Typography>
-                  // </Stack>
                 );
               })
             : null}

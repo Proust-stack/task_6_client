@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { NavLink, useNavigate } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -9,10 +9,9 @@ import Autocomplete from "@mui/material/Autocomplete";
 import moment from "moment";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import { io } from "socket.io-client";
 
-import { FORM_ROUTE, MESSAGES_ROUTE } from "../utils/const";
-import { login } from "../http/userAPI";
-import { registryUser } from "../store/userSlice";
+import { HOST, MESSAGES_ROUTE } from "../utils/const";
 import { getOutbox, sendMessage } from "../http/messageAPI";
 import { Typography } from "@mui/material";
 
@@ -21,23 +20,48 @@ const Alert = React.forwardRef(function Alert(props, ref) {
     <MuiAlert
       elevation={6}
       ref={ref}
-      variant="filled"
       {...props}
-      sx={{ top: 0 }}
+      sx={{ top: 0, marginBottom: 10 }}
     />
   );
 });
 
 const FormPage = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { currentUser, users } = useSelector((state) => state.users);
-  const [errorMessage, setErrorMessage] = useState(null);
   const [title, setTitle] = useState("");
   const [to, setTo] = useState("");
   const [body, setBody] = useState("");
   const [outbox, setOutbox] = useState([]);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [arrivedMessage, setArrivalMessage] = useState(null);
+  const [state, setState] = useState({
+    openReceived: false,
+    vertical: "top",
+    horizontal: "center",
+  });
+  const { vertical, horizontal, openReceived } = state;
+
+  const socket = useRef();
+
+  useEffect(() => {
+    if (currentUser) {
+      socket.current = io(HOST);
+      socket.current.emit("add-user", currentUser);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (socket.current) {
+      socket.current.on("msg-recieve", (msg) => {
+        setArrivalMessage(msg);
+        handleClick({
+          vertical: "top",
+          horizontal: "center",
+        });
+      });
+    }
+  }, []);
 
   const defaultProps = {
     options: users,
@@ -69,9 +93,30 @@ const FormPage = () => {
     setOpen(false);
   };
 
+  const handleClick = (newState) => {
+    setState({ openReceived: true, ...newState });
+  };
+
+  const handleCloseReceived = () => {
+    setState({ ...state, openReceived: false });
+  };
+
   const click = async () => {
     try {
       await sendMessage(title, body, currentUser, to);
+      const msg = { title, body, from: currentUser };
+      if (to === currentUser) {
+        setArrivalMessage(msg);
+        handleClick({
+          vertical: "top",
+          horizontal: "center",
+        });
+      }
+      socket.current.emit("send-msg", {
+        to: to,
+        from: currentUser,
+        msg,
+      });
       setOpen(true);
       setOutbox([]);
       setTo("");
@@ -134,15 +179,43 @@ const FormPage = () => {
             onClick={() => navigate(MESSAGES_ROUTE)}
             sx={{ position: "absolute", top: 2, right: 20 }}
           >
-            To inbox messages
+            To inbox
           </Button>
-          <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+          <Snackbar
+            open={open}
+            autoHideDuration={3000}
+            onClose={handleClose}
+            anchorOrigin={{ vertical, horizontal }}
+            sx={{ marginBottom: 10 }}
+          >
             <Alert
               onClose={handleClose}
               severity="success"
               sx={{ width: "100%" }}
             >
               Message is sent!
+            </Alert>
+          </Snackbar>
+          <Snackbar
+            anchorOrigin={{ vertical, horizontal }}
+            autoHideDuration={3000}
+            open={openReceived}
+            onClose={handleCloseReceived}
+          >
+            <Alert
+              onClose={handleCloseReceived}
+              severity="success"
+              sx={{ width: "100%" }}
+            >
+              <Stack>
+                {arrivedMessage && (
+                  <>
+                    <Typography>{arrivedMessage.from}</Typography>
+                    <Typography>{arrivedMessage.title}</Typography>
+                    <Typography>{arrivedMessage.body}</Typography>
+                  </>
+                )}
+              </Stack>
             </Alert>
           </Snackbar>
         </Stack>
@@ -160,7 +233,7 @@ const FormPage = () => {
           spacing={2}
         >
           <Typography sx={{ color: "white" }}>
-            Mesages: {to ? to : "choose receipient"}
+            Outbox mesages: {to ? to : "choose receipient"}
           </Typography>
           {outbox.length
             ? outbox.map((item) => {
