@@ -11,7 +11,7 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import { io } from "socket.io-client";
 
-import { HOST, MESSAGES_ROUTE } from "../utils/const";
+import { MESSAGES_ROUTE } from "../utils/const";
 import { getOutbox, sendMessage } from "../http/messageAPI";
 import { Typography } from "@mui/material";
 
@@ -46,7 +46,7 @@ const FormPage = () => {
 
   useEffect(() => {
     if (currentUser) {
-      socket.current = io(HOST);
+      socket.current = io(process.env.HOST);
       socket.current.emit("add-user", currentUser);
     }
   }, [currentUser]);
