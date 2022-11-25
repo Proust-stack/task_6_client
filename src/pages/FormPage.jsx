@@ -46,7 +46,7 @@ const FormPage = () => {
 
   useEffect(() => {
     if (currentUser) {
-      socket.current = io(process.env.HOST);
+      socket.current = io("http://localhost:5000");
       socket.current.emit("add-user", currentUser);
     }
   }, [currentUser]);
