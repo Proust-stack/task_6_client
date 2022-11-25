@@ -22,6 +22,7 @@ const MessagePage = () => {
 
   const getInboxMessages = async () => {
     const inbox = await getInbox(currentUser);
+    inbox.sort((a, b) => +a.createdAt - +b.createdAt);
     setInbox(inbox);
   };
 

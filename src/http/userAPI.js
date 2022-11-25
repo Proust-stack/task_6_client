@@ -1,10 +1,21 @@
 import axios from "axios";
 
 export const login = async (name) => {
-  const { data } = await axios.post(process.env.REACT_APP_POST_LOGIN, { name });
-  return data;
+  try {
+    const { data } = await axios.post(process.env.REACT_APP_POST_LOGIN, {
+      name,
+    });
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
 };
+
 export const getAllUsers = async () => {
-  const { data } = await axios.get(process.env.REACT_APP_GET_ALL_USERS);
-  return data;
+  try {
+    const { data } = await axios.get(process.env.REACT_APP_GET_ALL_USERS);
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
 };

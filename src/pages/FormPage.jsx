@@ -69,9 +69,9 @@ const FormPage = () => {
   };
 
   const getOutboxMessages = async (newValue) => {
-    const outbox = await getOutbox(currentUser);
-    const filteredOutbox = outbox.filter((item) => item.to === newValue);
-    setOutbox(filteredOutbox);
+    const outbox = await getOutbox(currentUser, newValue);
+    console.log(outbox);
+    setOutbox(outbox);
   };
 
   const handleTo = (event, newValue) => {
@@ -242,6 +242,7 @@ const FormPage = () => {
                     <Typography sx={{ color: "white" }}>
                       Title: {item.title}
                     </Typography>
+                    <Typography>{item.body}</Typography>
                     <Typography>
                       {moment(`${item.createdAt || ""}`).format(
                         "MMMM Do YYYY, h:mm:ss a"
