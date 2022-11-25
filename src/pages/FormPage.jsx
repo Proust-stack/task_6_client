@@ -46,7 +46,7 @@ const FormPage = () => {
 
   useEffect(() => {
     if (currentUser) {
-      socket.current = io("http://localhost:5000");
+      socket.current = io("https://mailtask6.herokuapp.com");
       socket.current.emit("add-user", currentUser);
     }
   }, [currentUser]);
