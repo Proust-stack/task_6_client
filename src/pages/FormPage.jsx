@@ -30,7 +30,7 @@ const FormPage = () => {
   const navigate = useNavigate();
   const { currentUser, users } = useSelector((state) => state.users);
   const [title, setTitle] = useState("");
-  const [to, setTo] = useState("");
+  const [to, setTo] = useState(null);
   const [body, setBody] = useState("");
   const [outbox, setOutbox] = useState([]);
   const [open, setOpen] = useState(false);
@@ -63,14 +63,8 @@ const FormPage = () => {
     }
   }, []);
 
-  const defaultProps = {
-    options: users,
-    getOptionLabel: (option) => (option.name ? option.name : option),
-  };
-
   const getOutboxMessages = async (newValue) => {
     const outbox = await getOutbox(currentUser, newValue);
-    console.log(outbox);
     setOutbox(outbox);
   };
 
@@ -146,7 +140,7 @@ const FormPage = () => {
         >
           <Stack spacing={1} sx={{ minWidth: 200 }}>
             <Autocomplete
-              {...defaultProps}
+              options={users}
               value={to}
               onChange={handleTo}
               renderInput={(params) => (
